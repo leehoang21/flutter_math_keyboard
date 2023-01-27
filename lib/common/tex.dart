@@ -5,7 +5,7 @@ class Note {
   late List<Tex> body;
 
   String get tex {
-    return label + body.map((e) => e.tex).join();
+    return body.map((e) => e.tex).join();
   }
 
   Note({
@@ -13,6 +13,16 @@ class Note {
     List<Tex>? body,
   }) {
     this.body = body ?? [];
+  }
+
+  Note copyWith({
+    String? label,
+    List<Tex>? body,
+  }) {
+    return Note(
+      label: label ?? this.label,
+      body: body ?? this.body,
+    );
   }
 }
 
@@ -41,16 +51,20 @@ class Tex {
   });
 
   String get tex {
-    return firtsTex + (lastTex != null ? lastTex!.tex : '');
+    return firtsTex +
+        (lastTex != null ? lastTex!.tex : '') +
+        (end != null ? end!.label : '');
   }
 
   Tex copyWith({
     String? firtsTex,
     Note? lastTex,
+    Cursor? end,
   }) {
     return Tex(
       firtsTex: firtsTex ?? this.firtsTex,
       lastTex: lastTex ?? this.lastTex,
+      end: end ?? this.end,
     );
   }
 }
@@ -286,26 +300,26 @@ class ButtonTex extends Note {
 }
 
 class DeleteTex extends ButtonTex {
-  DeleteTex()
+  DeleteTex(VoidCallback onPressed)
       : super(
           icon: Icons.backspace,
-          onPressed: () {},
+          onPressed: onPressed,
         );
 }
 
 class PreviousTex extends ButtonTex {
-  PreviousTex()
+  PreviousTex(VoidCallback onPressed)
       : super(
           icon: Icons.arrow_back_ios,
-          onPressed: () {},
+          onPressed: onPressed,
         );
 }
 
 class NextTex extends ButtonTex {
-  NextTex()
+  NextTex(VoidCallback onPressed)
       : super(
           icon: Icons.arrow_forward_ios,
-          onPressed: () {},
+          onPressed: onPressed,
         );
 }
 

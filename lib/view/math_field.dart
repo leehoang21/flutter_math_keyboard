@@ -75,7 +75,9 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                     onClose: () {
                       _toggleDropdown(close: true);
                     },
-                    listKey: KeyboardContant().functionKeyboard,
+                    listKey: KeyboardContant(
+                      widget.controller,
+                    ).functionKeyboard,
                     controller: widget.controller,
                   ),
                 ),

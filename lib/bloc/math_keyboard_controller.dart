@@ -13,12 +13,25 @@ class MathKeyboardController {
     stack.add(expressions);
     while (stack.isNotEmpty) {
       Note item = stack.removeLast();
-      for (var element in item.body) {
+      for (var i = 0; i < item.body.length; i++) {
+        var element = item.body[i];
         if (element.end != null) {
+          element.end = null;
           if (element.lastTex == null) {
-            item.body.addAll(value.body);
+            for (var j = 0; j < value.copyWith().body.length; j++) {
+              item.body.insert(i + j, value.copyWith().body[j]);
+            }
+            //add cusor
+            item.body.last = item.body.last.copyWith(
+              end: Cursor(),
+            );
           } else {
-            element.lastTex!.body.addAll(value.body);
+            for (var j = 0; j < value.copyWith().body.length; j++) {
+              element.lastTex!.body.insert(j, value.copyWith().body[j]);
+            } //add cusor
+            element.lastTex!.body.last = element.lastTex!.body.last.copyWith(
+              end: Cursor(),
+            );
           }
           break;
         } else if (element.lastTex != null) {
@@ -29,21 +42,28 @@ class MathKeyboardController {
     _streamController.add(expressions.tex);
   }
 
-  // shiftCursorLeft() {
-  //   List<Tex> stack = [];
-  //   stack.addAll(expressions);
-  //   while (stack.isNotEmpty) {
-  //     Tex item = stack.removeLast();
-  //     if (item.end != null) {
-  //       item.body.add(value);
-  //       _streamController.add(tex);
-  //     } else if (item.isCusorChild) {
-  //       stack = item.body;
-  //     } else {
-  //       stack.addAll(item.body);
-  //     }
-  //   }
-  // }
+  shiftCursorLeft() {
+    List<Note> stack = [];
+    stack.add(expressions);
+    while (stack.isNotEmpty) {
+      Note item = stack.removeLast();
+      for (var i = 0; i < item.body.length; i++) {
+        var element = item.body[i];
+        if (element.end != null) {
+          element.end = null;
+          if (i > 0) {
+            item.body[i - 1] = item.body[i - 1].copyWith(
+              end: Cursor(),
+            );
+          } else {}
+          break;
+        } else if (element.lastTex != null) {
+          stack.add(element.lastTex!);
+        }
+      }
+    }
+    _streamController.add(expressions.tex);
+  }
 
   String get tex {
     return expressions.body.map((e) => e.tex).join();
