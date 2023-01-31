@@ -1,297 +1,110 @@
 import 'package:flutter/material.dart';
 
-class Note {
-  final String label;
-  late List<Tex> body;
-
-  String get tex {
-    return body.map((e) => e.tex).join();
-  }
-
-  Note({
-    required this.label,
-    List<Tex>? body,
-  }) {
-    this.body = body ?? [];
-  }
-
-  Note copyWith({
-    String? label,
-    List<Tex>? body,
-  }) {
-    return Note(
-      label: label ?? this.label,
-      body: body ?? this.body,
-    );
-  }
-}
-
-class EmptyNote extends Note {
-  EmptyNote()
-      : super(
-          label: '',
-          body: [
-            Tex(
-              firtsTex: '',
-              end: Cursor(),
-            ),
-          ],
-        );
-}
-
 class Tex {
-  final String firtsTex;
-  final Note? lastTex;
-  Cursor? end;
+  static const String charTex = r'$';
 
-  Tex({
-    this.firtsTex = '',
-    this.lastTex,
-    this.end,
-  });
+  static String tex(String label) => charTex + label + charTex;
 
-  String get tex {
-    return firtsTex +
-        (lastTex != null ? lastTex!.tex : '') +
-        (end != null ? end!.label : '');
+  static String deleteTexChar(String tex) {
+    final open = tex.replaceAll(charTex, '');
+    final close = open.replaceAll(charTex, '');
+    return close;
   }
 
-  Tex copyWith({
-    String? firtsTex,
-    Note? lastTex,
-    Cursor? end,
-  }) {
-    return Tex(
-      firtsTex: firtsTex ?? this.firtsTex,
-      lastTex: lastTex ?? this.lastTex,
-      end: end ?? this.end,
-    );
-  }
+  static String get cursor =>
+      '\\textcolor{#${(0xFF7F00 & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}}{\\cursor}';
+  static String get box => r'\Box';
+
+  static String get frac => tex(r'\frac{') + box + tex(r'}{') + box + tex(r'}');
+  static String get pow2 => tex(r'{') + box + tex(r'}^2');
+  static String get pow => tex(r'{') + box + tex(r'}^{') + box + tex(r'}');
+  static String get leg => tex(r'{\leq}');
+  static String get geqslant => tex(r'{\geqslant}');
+  static String get matrix =>
+      tex(r'\begin{bmatrix}{') +
+      box +
+      tex(r'}\\{') +
+      box +
+      tex(r'}\end{bmatrix}');
+
+  static String get sqrt2 => tex(r'\sqrt{') + box + tex(r'}');
+  static String get sqrt => tex(r'\sqrt[{\Box}]{\Box}');
+  static String get different => tex(r'{\neq}');
+  static String get pi => tex(r'{\pi}');
+  static String get log => tex(r'\log_{\Box}({\Box})');
+  static String get ln => tex(r'\ln({\Box})');
+  static String get integral => tex(r'\int_{\Box}^{\Box} {\Box} dx');
+  static String get sum => tex(r'\sum_{\Box}^{\Box} {\Box}');
+  static String get product => tex(r'\prod_{\Box}^{\Box} {\Box}');
+  static String get lim => tex(r'\lim_{{\Box}\to {\Box}}');
+
+  static List<String> get listTex => <String>[
+        frac,
+        pow2,
+        pow,
+        leg,
+        geqslant,
+        matrix,
+        sqrt2,
+        sqrt,
+        different,
+        pi,
+        log,
+        ln,
+        integral,
+        sum,
+        product,
+        lim,
+      ];
+
+  static List<String> get listText => [
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '0',
+        'a',
+        'b',
+        'c',
+        'd',
+        'e',
+        'f',
+        'g',
+        'h',
+        'i',
+        'j',
+        'k',
+        'l',
+        'm',
+        'n',
+        'o',
+        'p',
+        'q',
+        'r',
+        's',
+        't',
+        'u',
+        'v',
+        'w',
+        'x',
+        'y',
+        'z',
+      ];
 }
 
-class Cursor extends Note {
-  /// Creates a TeX [Cursor].
-  Cursor()
-      : super(
-          label:
-              '\\textcolor{#${(0xFF7F00 & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}}{\\cursor}',
-          body: [
-            Tex(
-              firtsTex:
-                  '\\textcolor{#${(0xFF7F00 & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}}{\\cursor}',
-            ),
-          ],
-        );
-}
-
-class BoxTex extends Note {
-  BoxTex()
-      : super(
-          label: r'\Box',
-          body: [
-            Tex(
-              firtsTex: r'\Box',
-            ),
-          ],
-        );
-}
-
-class FracTex extends Note {
-  FracTex()
-      : super(
-          label: r'\frac{\Box}{\Box}',
-          body: [
-            Tex(firtsTex: r'\frac{', lastTex: BoxTex()),
-            Tex(firtsTex: '}{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}'),
-          ],
-        );
-}
-
-class Pow2 extends Note {
-  Pow2()
-      : super(
-          label: r'{\Box}^2',
-          body: [
-            Tex(firtsTex: r'{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}^2'),
-          ],
-        );
-}
-
-class Pow extends Note {
-  Pow()
-      : super(
-          label: r'{\Box}^{\Box}',
-          body: [
-            Tex(firtsTex: r'{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}^{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}'),
-          ],
-        );
-}
-
-class LegTex extends Note {
-  LegTex()
-      : super(
-          label: r'{\leq}',
-          body: [
-            Tex(firtsTex: r'{\leq}'),
-          ],
-        );
-}
-
-class GeqslantTex extends Note {
-  GeqslantTex()
-      : super(
-          label: r'{\geqslant}',
-          body: [
-            Tex(
-              firtsTex: r'{\geqslant}',
-            ),
-          ],
-        );
-}
-
-class MatrixTex extends Note {
-  MatrixTex()
-      : super(
-          label: r'\begin{bmatrix}{\Box}\\{\Box}\end{bmatrix}',
-          body: [
-            Tex(firtsTex: r'\begin{bmatrix}{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}\\{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}\end{bmatrix}'),
-          ],
-        );
-}
-
-class SqrtTex2 extends Note {
-  SqrtTex2()
-      : super(
-          label: r'\sqrt{\Box}',
-          body: [
-            Tex(firtsTex: r'\sqrt{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}'),
-          ],
-        );
-}
-
-class SqrtTex extends Note {
-  SqrtTex()
-      : super(
-          label: r'\sqrt[{\Box}]{\Box}',
-          body: [
-            Tex(firtsTex: r'\sqrt[{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}]{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}'),
-          ],
-        );
-}
-
-class DifferentTex extends Note {
-  DifferentTex()
-      : super(
-          label: r'{\neq}',
-          body: [
-            Tex(firtsTex: r'{\neq}'),
-          ],
-        );
-}
-
-class PiTex extends Note {
-  PiTex()
-      : super(
-          label: r'{\pi}',
-          body: [
-            Tex(firtsTex: r'{\pi}'),
-          ],
-        );
-}
-
-class LogTex extends Note {
-  LogTex()
-      : super(
-          label: r'\log_{\Box}({\Box})',
-          body: [
-            Tex(firtsTex: r'\log_{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}({', lastTex: BoxTex()),
-            Tex(firtsTex: r'})'),
-          ],
-        );
-}
-
-class LnTex extends Note {
-  LnTex()
-      : super(
-          label: r'\ln({\Box})',
-          body: [
-            Tex(firtsTex: r'\ln({', lastTex: BoxTex()),
-            Tex(firtsTex: r'})'),
-          ],
-        );
-}
-
-class IntegralTex extends Note {
-  IntegralTex()
-      : super(
-          label: r'\int_{\Box}^{\Box} {\Box} dx',
-          body: [
-            Tex(firtsTex: r'\int_{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}^{', lastTex: BoxTex()),
-            Tex(firtsTex: r'} {', lastTex: BoxTex()),
-            Tex(firtsTex: r'} dx'),
-          ],
-        );
-}
-
-class SumTex extends Note {
-  SumTex()
-      : super(
-          label: r'\sum_{\Box}^{\Box} {\Box}',
-          body: [
-            Tex(firtsTex: r'\sum_{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}^{', lastTex: BoxTex()),
-            Tex(firtsTex: r'} {', lastTex: BoxTex()),
-            Tex(firtsTex: r'}'),
-          ],
-        );
-}
-
-class ProductTex extends Note {
-  ProductTex()
-      : super(
-          label: r'\prod_{\Box}^{\Box} {\Box}',
-          body: [
-            Tex(firtsTex: r'\prod_{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}^{', lastTex: BoxTex()),
-            Tex(firtsTex: r'} {', lastTex: BoxTex()),
-            Tex(firtsTex: r'}'),
-          ],
-        );
-}
-
-class LimTex extends Note {
-  LimTex()
-      : super(
-          label: r'\lim_{{\Box}\to {\Box}}',
-          body: [
-            Tex(firtsTex: r'\lim_{{', lastTex: BoxTex()),
-            Tex(firtsTex: r'}\to {', lastTex: BoxTex()),
-            Tex(firtsTex: r'}}'),
-          ],
-        );
-}
-
-class ButtonTex extends Note {
+class ButtonTex {
   final IconData icon;
   final VoidCallback onPressed;
 
   ButtonTex({
     required this.icon,
     required this.onPressed,
-  }) : super(
-          label: '',
-        );
+  });
 
   Widget get button => IconButton(
         icon: Icon(icon),

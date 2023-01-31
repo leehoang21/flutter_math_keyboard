@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_math_keyboard/bloc/math_keyboard_controller.dart';
-import 'package:flutter_math_keyboard/common/key_board_contant.dart';
+import 'package:flutter_math_keyboard/common/key_board_type.dart';
 import 'package:flutter_math_keyboard/common/tex.dart';
+import 'package:flutter_math_keyboard/view/bottom_widget.dart';
+import 'package:flutter_math_keyboard/view/header.dart';
 import 'package:flutter_math_keyboard/view/keyboard_.dart';
 
 class MathField extends StatefulWidget {
@@ -22,6 +24,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
   bool _isOpen = false;
   late AnimationController _animationController;
   late Animation<double> _expandAnimation;
+  KeyboardType _type = KeyboardType.symbol;
 
   @override
   void initState() {
@@ -45,7 +48,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             stream: widget.controller.texStream,
             builder: (context, snapshot) {
               return Math.tex(
-                snapshot.data ?? Cursor().tex,
+                Tex.deleteTexChar(snapshot.data ?? Tex.cursor),
                 options: MathOptions(
                   fontSize: 14,
                 ),
@@ -71,14 +74,28 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                 child: SizeTransition(
                   axisAlignment: 1,
                   sizeFactor: _expandAnimation,
-                  child: KeyBoardWidget(
-                    onClose: () {
-                      _toggleDropdown(close: true);
-                    },
-                    listKey: KeyboardContant(
-                      widget.controller,
-                    ).functionKeyboard,
-                    controller: widget.controller,
+                  child: Column(
+                    children: [
+                      HeaderWidget(
+                        onChange: (type) {
+                          setState(() {
+                            _type = type;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: KeyBoardWidget(
+                          onClose: () {
+                            _toggleDropdown(close: true);
+                          },
+                          listKey: _type.listKey,
+                          controller: widget.controller,
+                        ),
+                      ),
+                      BottomWidget(
+                        controller: widget.controller,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -98,7 +115,7 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       });
     } else {
       _overlayEntry = _createOverlayEntry();
-      Overlay.of(context)?.insert(_overlayEntry);
+      Overlay.of(context).insert(_overlayEntry);
       setState(() => _isOpen = true);
       _animationController.forward();
     }

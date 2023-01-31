@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_math_keyboard/bloc/math_keyboard_controller.dart';
-import 'package:flutter_math_keyboard/common/tex.dart';
+import 'package:flutter_math_keyboard/common/common.dart';
 
 class KeyBoardWidget extends StatelessWidget {
   const KeyBoardWidget({
@@ -10,7 +10,7 @@ class KeyBoardWidget extends StatelessWidget {
     required this.onClose,
     required this.controller,
   }) : super(key: key);
-  final List<Note> listKey;
+  final List<String> listKey;
   final VoidCallback onClose;
   final MathKeyboardController controller;
 
@@ -31,16 +31,13 @@ class KeyBoardWidget extends StatelessWidget {
     );
   }
 
-  Widget _getButton(Note item) {
-    if (item is ButtonTex) {
-      return item.button;
-    }
+  Widget _getButton(String item) {
     return TextButton(
       onPressed: () {
         controller.addExpressions(item);
       },
       child: Math.tex(
-        item.label,
+        Tex.deleteTexChar(item),
       ),
     );
   }

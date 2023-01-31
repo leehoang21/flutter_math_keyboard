@@ -3,69 +3,64 @@ import 'dart:async';
 import 'package:flutter_math_keyboard/common/common.dart';
 
 class MathKeyboardController {
-  Note expressions = EmptyNote();
+  String expressions = Tex.cursor;
+  int indexCursor = 0;
+  final cursorLength = Tex.cursor.length;
+
   final StreamController<String> _streamController =
       StreamController.broadcast();
   Stream<String> get texStream => _streamController.stream;
 
-  void addExpressions(Note value) {
-    List<Note> stack = [];
-    stack.add(expressions);
-    while (stack.isNotEmpty) {
-      Note item = stack.removeLast();
-      for (var i = 0; i < item.body.length; i++) {
-        var element = item.body[i];
-        if (element.end != null) {
-          element.end = null;
-          if (element.lastTex == null) {
-            for (var j = 0; j < value.copyWith().body.length; j++) {
-              item.body.insert(i + j, value.copyWith().body[j]);
-            }
-            //add cusor
-            item.body.last = item.body.last.copyWith(
-              end: Cursor(),
-            );
-          } else {
-            for (var j = 0; j < value.copyWith().body.length; j++) {
-              element.lastTex!.body.insert(j, value.copyWith().body[j]);
-            } //add cusor
-            element.lastTex!.body.last = element.lastTex!.body.last.copyWith(
-              end: Cursor(),
-            );
-          }
-          break;
-        } else if (element.lastTex != null) {
-          stack.add(element.lastTex!);
-        }
-      }
-    }
-    _streamController.add(expressions.tex);
+  void addExpressions(String value) {
+    expressions = expressions.substring(0, indexCursor) +
+        value +
+        expressions.substring(indexCursor);
+    changeIndexCursor();
+    _streamController.add(expressions);
+  }
+
+  deleteExpressions() {
+    expressions = expressions.substring(0, indexCursor - 1) +
+        expressions.substring(indexCursor + cursorLength);
+    changeIndexCursor();
+    _streamController.add(expressions);
+  }
+
+  changeIndexCursor() {
+    indexCursor = expressions.indexOf(Tex.cursor);
   }
 
   shiftCursorLeft() {
-    List<Note> stack = [];
-    stack.add(expressions);
-    while (stack.isNotEmpty) {
-      Note item = stack.removeLast();
-      for (var i = 0; i < item.body.length; i++) {
-        var element = item.body[i];
-        if (element.end != null) {
-          element.end = null;
-          if (i > 0) {
-            item.body[i - 1] = item.body[i - 1].copyWith(
-              end: Cursor(),
-            );
-          } else {}
-          break;
-        } else if (element.lastTex != null) {
-          stack.add(element.lastTex!);
-        }
-      }
+    expressions.replaceAll(Tex.cursor, '');
+
+    if (expressions[indexCursor - 1] == Tex.charTex) {
+      indexCursor = indexOf(Tex.charTex, indexCursor - 1);
     }
-    _streamController.add(expressions.tex);
+    expressions = expressions.substring(0, indexCursor - 1) +
+        Tex.cursor +
+        expressions.substring(indexCursor - 1);
+    changeIndexCursor();
+    _streamController.add(expressions);
   }
 
-  String get tex {
-    return expressions.body.map((e) => e.tex).join();
+  int indexOf(String value, [int? end]) {
+    for (var i = (end ?? expressions.length) - 1; i >= 0; i--) {
+      if (expressions[i] == value) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  shiftCursorRight() {
+    expressions.replaceAll(Tex.cursor, '');
+    if (expressions[indexCursor - 1] == Tex.charTex) {
+      indexCursor = expressions.indexOf(Tex.charTex, indexCursor + 1);
+    }
+    expressions = expressions.substring(0, indexCursor + 1) +
+        Tex.cursor +
+        expressions.substring(indexCursor + 1);
+    changeIndexCursor();
+    _streamController.add(expressions);
   }
 }
