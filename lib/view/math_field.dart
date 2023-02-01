@@ -78,9 +78,8 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
                     children: [
                       HeaderWidget(
                         onChange: (type) {
-                          setState(() {
-                            _type = type;
-                          });
+                          _type = type;
+                          _overlayEntry.markNeedsBuild();
                         },
                       ),
                       Expanded(

@@ -7,8 +7,20 @@ class Tex {
 
   static String deleteTexChar(String tex) {
     final open = tex.replaceAll(charTex, '');
-    final close = open.replaceAll(charTex, '');
-    return close;
+    return open;
+  }
+
+  static bool isCharOpenAndClose(char) {
+    final listChar = [
+      Tex.charTex,
+      '{',
+      '}',
+    ];
+
+    if (listChar.contains(char)) {
+      return true;
+    }
+    return false;
   }
 
   static String get cursor =>

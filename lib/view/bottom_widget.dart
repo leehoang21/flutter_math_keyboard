@@ -21,7 +21,7 @@ class BottomWidget extends StatelessWidget {
         leading ?? const SizedBox(),
         IconButton(
           onPressed: () {
-            controller.shiftCursorLeft();
+            controller.setSursorLeft();
           },
           icon: const Icon(Icons.arrow_back_ios),
         ),
@@ -33,7 +33,7 @@ class BottomWidget extends StatelessWidget {
         ),
         IconButton(
           onPressed: () {
-            controller.shiftCursorRight();
+            controller.setSursorRight();
           },
           icon: const Icon(Icons.arrow_forward_ios),
         ),
