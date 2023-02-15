@@ -21,25 +21,23 @@ class BottomWidget extends StatelessWidget {
         leading ?? const SizedBox(),
         IconButton(
           onPressed: () {
-            controller.setSursorLeft();
+            controller.shiftCursorLeft();
           },
           icon: const Icon(Icons.arrow_back_ios),
         ),
         IconButton(
-          onPressed: () {
-            controller.addExpressions(r' ');
-          },
+          onPressed: () {},
           icon: const Icon(Icons.space_bar),
         ),
         IconButton(
           onPressed: () {
-            controller.setSursorRight();
+            controller.shiftCursorRight();
           },
           icon: const Icon(Icons.arrow_forward_ios),
         ),
         IconButton(
           onPressed: () {
-            controller.deleteExpressions();
+            //controller.remove();
           },
           icon: const Icon(Icons.backspace),
         ),

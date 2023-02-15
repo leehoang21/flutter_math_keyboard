@@ -44,11 +44,13 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
       width: double.infinity,
       child: InkWell(
         onTap: _toggleDropdown,
-        child: StreamBuilder<String>(
+        child: StreamBuilder<List<Tex>>(
             stream: widget.controller.texStream,
             builder: (context, snapshot) {
+              final data = snapshot.data;
+              final tex = getTex(data);
               return Math.tex(
-                Tex.deleteTexChar(snapshot.data ?? Tex.cursor),
+                tex,
                 options: MathOptions(
                   fontSize: 14,
                 ),
@@ -56,6 +58,27 @@ class _MathFieldState extends State<MathField> with TickerProviderStateMixin {
             }),
       ),
     );
+  }
+
+  String getTex(List<Tex>? data) {
+    if (data == null || data.isEmpty) {
+      return Cursor().header;
+    } else {
+      String display = '';
+      for (var i = 0; i < data.length; i++) {
+        final item = data[i];
+        if (i + 1 < data.length) {
+          if (data[i + 1] is Cursor && i + 2 < data.length) {
+            display += item.displayTex(data[i + 2]);
+          } else {
+            display += item.displayTex(data[i + 1]);
+          }
+        } else {
+          display += item.displayTex(null);
+        }
+      }
+      return display;
+    }
   }
 
   OverlayEntry _createOverlayEntry() {

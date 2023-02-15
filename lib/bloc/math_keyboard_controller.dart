@@ -1,143 +1,75 @@
 import 'dart:async';
+import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_math_keyboard/common/common.dart';
 
 class MathKeyboardController {
-  String expressions = Tex.cursor;
-  int indexCursor = 0;
+  List<Tex> children = [Cursor()];
+  int courserPosition = 0;
 
-  final StreamController<String> _streamController =
+  final StreamController<List<Tex>> _streamController =
       StreamController.broadcast();
-  Stream<String> get texStream => _streamController.stream;
+  Stream<List<Tex>> get texStream => _streamController.stream;
 
-  void addExpressions(String value) {
-    expressions = expressions.substring(0, indexCursor) +
-        value +
-        expressions.substring(indexCursor);
-    _changeIndexCursor();
-    _streamController.add(expressions);
+  /// Sets the courser to the actual position.
+  void setCursor() {
+    children.insert(courserPosition, Cursor());
+    listener();
   }
 
-  deleteExpressions() {
-    expressions = expressions.substring(0, indexCursor - 1) +
-        expressions.substring(indexCursor);
-    _changeIndexCursor();
-    _streamController.add(expressions);
+  /// Removes the courser.
+  void removeCursor() {
+    if (children[courserPosition] is Cursor) {
+      children.removeAt(courserPosition);
+    }
+    listener();
   }
 
-  _changeIndexCursor() {
-    indexCursor = expressions.indexOf(Tex.cursor);
+  void listener() {
+    _streamController.add(children);
   }
 
-  _shiftCursor(VoidCallback callback) {
-    _removeCursor();
-    if (indexCursor < 0 || indexCursor >= expressions.length) {
-      _setCursor();
+  /// Shift courser to the left.
+  void shiftCursorLeft() {
+    if (courserPosition == 0) {
       return;
     }
-    callback();
-
-    _changeIndexCursor();
-    _streamController.add(expressions);
+    removeCursor();
+    courserPosition--;
+    setCursor();
+    listener();
   }
 
-  setSursorLeft() {
-    _shiftCursor(
-      () {
-        int lengthRemoveChar = 1;
-        final int lengthBox = Tex.box.length;
-        if (expressions[indexCursor - lengthRemoveChar] == Tex.charTex) {
-          //bỏ qua các kí tự tex đặc biệt
-          if (indexCursor - lengthRemoveChar - 1 >= 0) {
-            while (Tex.isCharOpenAndClose(
-                expressions[indexCursor - lengthRemoveChar - 1])) {
-              if (indexCursor - lengthRemoveChar - 1 <= 0) {
-                break;
-              }
-              lengthRemoveChar++;
-            }
-          }
-          //set lại vị trí con trỏ
-          indexCursor = indexOf(
-            Tex.charTex,
-            indexCursor - lengthRemoveChar,
-          );
-        } else if ((indexCursor - lengthBox) > 0 &&
-            expressions.contains(
-                Tex.deleteTexChar(Tex.box), indexCursor - lengthBox)) {
-          indexCursor = expressions.indexOf(
-              Tex.deleteTexChar(Tex.box), indexCursor - lengthBox);
-        } else {
-          if (indexCursor > 0) {
-            indexCursor--;
-          }
-        }
-        _setCursor();
-      },
+  /// Shift courser to the right.
+  void shiftCursorRight() {
+    if (courserPosition == children.length - 1) {
+      return;
+    }
+    removeCursor();
+    courserPosition++;
+    setCursor();
+    listener();
+  }
+
+  /// Adds a new node.
+  void addTeX(Note note) {
+    children.insertAll(
+      courserPosition,
+      note.getListTex(),
     );
+    log(children.map((e) => e.displayTex(null)).join());
+    courserPosition += note.getListTex().length;
+    listener();
   }
 
-  setSursorRight() {
-    _shiftCursor(
-      () {
-        final int lengthBox = Tex.box.length;
-        int lengthRemoveChar = 0;
-        //
-
-        //
-        if (expressions[indexCursor] == Tex.charTex) {
-          //bỏ qua các kí tự đặc biệt trong tex
-          if (indexCursor + lengthRemoveChar + 1 < expressions.length) {
-            while (Tex.isCharOpenAndClose(
-                expressions[indexCursor + lengthRemoveChar + 1])) {
-              if (indexCursor + lengthRemoveChar + 1 >= expressions.length) {
-                break;
-              }
-              lengthRemoveChar++;
-            }
-          }
-
-          //set lại vị trí con trỏ
-          indexCursor = expressions.indexOf(
-              Tex.charTex, indexCursor + ++lengthRemoveChar);
-        } else if ((indexCursor + lengthBox) < expressions.length &&
-            expressions.contains(Tex.deleteTexChar(Tex.box), indexCursor)) {
-          indexCursor =
-              expressions.indexOf(Tex.deleteTexChar(Tex.box), indexCursor) +
-                  lengthBox;
-        } else {
-          if (indexCursor < expressions.length) {
-            indexCursor++;
-          }
-        }
-        _setCursor();
-      },
-    );
-  }
-
-  _setCursor() {
-    if (indexCursor < 0) {
-      indexCursor = 0;
+  /// Removes the last node.
+  void remove() {
+    if (courserPosition == 0) {
+      return;
     }
-    if (indexCursor >= expressions.length) {
-      indexCursor = expressions.length - 1;
-    }
-    expressions = expressions.substring(0, indexCursor) +
-        Tex.cursor +
-        expressions.substring(indexCursor);
-  }
-
-  _removeCursor() {
-    expressions = expressions.replaceAll(Tex.cursor, '');
-  }
-
-  int indexOf(String value, int? end, [bool isLeft = true]) {
-    for (var i = (end ?? expressions.length) - 1; i >= 0; i--) {
-      if (expressions[i] == value) {
-        return i;
-      }
-    }
-    return -1;
+    removeCursor();
+    children.removeAt(courserPosition);
+    setCursor();
+    listener();
   }
 }

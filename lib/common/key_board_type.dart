@@ -4,15 +4,18 @@ import 'package:flutter_math_keyboard/common/common.dart';
 enum KeyboardType {
   symbol,
   text,
+  number,
 }
 
 extension KeyboardTypeExtension on KeyboardType {
-  List<String> get listKey {
+  List<Note> get listKey {
     switch (this) {
       case KeyboardType.symbol:
-        return Tex.listTex;
+        return NoteKey.listTex;
       case KeyboardType.text:
-        return Tex.listText;
+        return NoteKey.listText;
+      case KeyboardType.number:
+        return NoteKey.listNumber;
     }
   }
 
@@ -22,6 +25,8 @@ extension KeyboardTypeExtension on KeyboardType {
         return const Icon(Icons.functions);
       case KeyboardType.text:
         return const Icon(Icons.abc);
+      case KeyboardType.number:
+        return const Icon(Icons.numbers);
     }
   }
 }

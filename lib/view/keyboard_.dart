@@ -10,7 +10,7 @@ class KeyBoardWidget extends StatelessWidget {
     required this.onClose,
     required this.controller,
   }) : super(key: key);
-  final List<String> listKey;
+  final List<Note> listKey;
   final VoidCallback onClose;
   final MathKeyboardController controller;
 
@@ -25,19 +25,28 @@ class KeyBoardWidget extends StatelessWidget {
       itemCount: listKey.length,
       itemBuilder: (BuildContext context, int index) {
         final item = listKey[index];
-
         return _getButton(item);
       },
     );
   }
 
-  Widget _getButton(String item) {
+  Widget _getButton(Note item) {
     return TextButton(
       onPressed: () {
-        controller.addExpressions(item);
+        controller.addTeX(item);
       },
       child: Math.tex(
-        Tex.deleteTexChar(item),
+        item.getListTex().map((e) => e.displayTex(null)).join(),
+        onErrorFallback: (errmsg) {
+          return Text(
+            item
+                .getListTex()
+                .map(
+                  (e) => e.displayTex(null),
+                )
+                .join(),
+          );
+        },
       ),
     );
   }
